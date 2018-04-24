@@ -2,12 +2,12 @@ package com.auroraapi.models;
 
 import java.util.Map;
 
-public class Intention {
+public class Interpret {
     private Text text;
     private String intent;
     private Map<String, String> entities;
 
-    public Intention(Text text, String intent, Map<String, String> entities) {
+    public Interpret(Text text, String intent, Map<String, String> entities) {
         setText(text);
         setIntent(intent);
         setEntities(entities);

@@ -19,7 +19,7 @@ public class Speech {
         throw new RuntimeException("Not implemented yet!");
     }
 
-    private Intention getIntention() {
-        return getText().getIntention();
+    private Interpret getInterpretation() {
+        return getText().getInterpretation();
     }
 }

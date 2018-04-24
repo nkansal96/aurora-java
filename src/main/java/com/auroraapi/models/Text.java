@@ -15,11 +15,11 @@ public class Text {
         this.text = text;
     }
 
-    public Speech toSpeech() {
+    public Speech getSpeech() {
         throw new RuntimeException("Not implemented yet!");
     }
 
-    public Intention getIntention() {
+    public Interpret getInterpretation() {
         throw new RuntimeException("Not implemented yet!");
     }
 }
