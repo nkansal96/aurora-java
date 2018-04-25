@@ -1,5 +1,7 @@
 package com.auroraapi.models;
 
+import com.auroraapi.Aurora;
+
 public class Text {
     private String text;
 
@@ -15,11 +17,11 @@ public class Text {
         this.text = text;
     }
 
-    public Speech getSpeech() {
-        throw new RuntimeException("Not implemented yet!");
+    public Speech getSpeech() throws AuroraException {
+        return Aurora.getSpeech(this);
     }
 
-    public Interpret getInterpretation() {
-        throw new RuntimeException("Not implemented yet!");
+    public Interpret getInterpretation() throws AuroraException {
+        return Aurora.getInterpretation(this);
     }
 }
