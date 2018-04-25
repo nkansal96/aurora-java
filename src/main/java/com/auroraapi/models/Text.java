@@ -24,4 +24,9 @@ public class Text {
     public Interpret getInterpretation() throws AuroraException {
         return Aurora.getInterpretation(this);
     }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }
