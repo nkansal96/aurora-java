@@ -2,13 +2,15 @@ package com.auroraapi.models;
 
 public class AuroraException extends Exception {
 
-    private String id;
-    private String type;
-    private String code;
-    private int status;
+    String id;
+    String type;
+    String code;
+    int status;
+    String message;
 
     public AuroraException(String message, String id, String type, String code, int status) {
         super(message);
+        this.message = message;
         this.id = id;
         this.type = type;
         this.code = code;

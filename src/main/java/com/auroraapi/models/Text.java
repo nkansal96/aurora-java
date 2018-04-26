@@ -17,11 +17,11 @@ public class Text {
         this.text = text;
     }
 
-    public Speech getSpeech() throws AuroraException {
+    public Speech getSpeech() throws Exception {
         return Aurora.getSpeech(this);
     }
 
-    public Interpret getInterpretation() throws AuroraException {
+    public Interpret getInterpretation() throws Exception {
         return Aurora.getInterpretation(this);
     }
 

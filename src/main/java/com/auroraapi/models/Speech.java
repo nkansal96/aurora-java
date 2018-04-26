@@ -17,11 +17,11 @@ public class Speech {
         this.audio = audio;
     }
 
-    private Text getText() throws AuroraException {
+    private Text getText() throws Exception {
         return Aurora.getText(this);
     }
 
-    private Interpret getInterpretation() throws AuroraException {
+    private Interpret getInterpretation() throws Exception {
         return getText().getInterpretation();
     }
 }
