@@ -24,6 +24,7 @@ public class Aurora {
     private static Aurora instance;
     private static AuroraService service;
     private static Retrofit retrofit;
+    private static Converter<ResponseBody, AuroraException> excpeptionConverter;
     private static String modelId;
 
     private Aurora(AuroraService auroraService) {
@@ -47,7 +48,7 @@ public class Aurora {
                     .baseUrl(BASE_URL_V1)
                     .client(client)
                     .build();
-
+            excpeptionConverter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
             instance = new Aurora(retrofit.create(AuroraService.class));
         }
     }
@@ -67,10 +68,9 @@ public class Aurora {
         Response<Text> response = service.getText(speech).execute();
         if (response.isSuccessful()) {
             return response.body();
-        } else {
-            Converter<ResponseBody, AuroraException> converter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
-            throw converter.convert(response.errorBody());
         }
+
+        throw getAuroraException(response);
     }
 
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
@@ -78,10 +78,9 @@ public class Aurora {
         Response<Speech> response = service.getSpeech(text).execute();
         if (response.isSuccessful()) {
             return response.body();
-        } else {
-            Converter<ResponseBody, AuroraException> converter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
-            throw converter.convert(response.errorBody());
         }
+
+        throw getAuroraException(response);
     }
 
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
@@ -89,15 +88,18 @@ public class Aurora {
         Response<Interpret> response = service.getInterpret(text, modelId).execute();
         if (response.isSuccessful()) {
             return response.body();
-        } else {
-            Converter<ResponseBody, AuroraException> converter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
-            throw converter.convert(response.errorBody());
         }
+
+        throw getAuroraException(response);
     }
 
     private static void checkInitialized() {
         if (instance == null) {
             throw new RuntimeException("Please call Aurora.init() first");
         }
+    }
+
+    private static AuroraException getAuroraException(Response response) throws IOException {
+        return excpeptionConverter.convert(response.errorBody());
     }
 }
