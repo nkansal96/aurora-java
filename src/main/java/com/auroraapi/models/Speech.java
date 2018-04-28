@@ -1,7 +1,5 @@
 package com.auroraapi.models;
 
-import com.auroraapi.Aurora;
-
 public class Speech {
     private Audio audio;
 
@@ -15,13 +13,5 @@ public class Speech {
 
     public void setAudio(Audio audio) {
         this.audio = audio;
-    }
-
-    private Text getText() throws Exception {
-        return Aurora.getText(this);
-    }
-
-    private Interpret getInterpretation() throws Exception {
-        return getText().getInterpretation();
     }
 }
