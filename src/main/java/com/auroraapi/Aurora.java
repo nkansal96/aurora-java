@@ -29,7 +29,7 @@ public class Aurora {
         service = auroraService;
     }
 
-    public static Aurora getInstance(String appId, String appToken) {
+    public static void init(String appId, String appToken) {
         if (instance == null) {
             Interceptor interceptor = chain -> chain.proceed(chain.request().newBuilder()
                     .addHeader("X-Application-ID", appId)
@@ -45,16 +45,12 @@ public class Aurora {
 
             instance = new Aurora(retrofit.create(AuroraService.class));
         }
-
-        return instance;
     }
 
-    public static Aurora getInstance(AuroraService auroraService) {
+    public static void init(AuroraService auroraService) {
         if (instance == null) {
             instance = new Aurora(auroraService);
         }
-
-        return instance;
     }
 
     public static void setModel(String model) {
@@ -62,6 +58,7 @@ public class Aurora {
     }
 
     public static Text getText(Speech speech) throws AuroraException, IOException {
+        checkInitialized();
         Response<Text> response = service.getText(speech).execute();
         if (response.isSuccessful()) {
             return response.body();
@@ -72,6 +69,7 @@ public class Aurora {
     }
 
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
+        checkInitialized();
         Response<Speech> response = service.getSpeech(text).execute();
         if (response.isSuccessful()) {
             return response.body();
@@ -82,12 +80,19 @@ public class Aurora {
     }
 
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
+        checkInitialized();
         Response<Interpret> response = service.getInterpret(text, modelId).execute();
         if (response.isSuccessful()) {
             return response.body();
         } else {
             Converter<ResponseBody, AuroraException> converter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
             throw converter.convert(response.errorBody());
+        }
+    }
+
+    private static void checkInitialized() {
+        if (instance == null) {
+            throw new RuntimeException("Please call Aurora.init() first");
         }
     }
 }
