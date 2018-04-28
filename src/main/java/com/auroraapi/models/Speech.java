@@ -1,7 +1,5 @@
 package com.auroraapi.models;
 
-import com.auroraapi.Aurora;
-
 public class Speech {
     private Audio audio;
 

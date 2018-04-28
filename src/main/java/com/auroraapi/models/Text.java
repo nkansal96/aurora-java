@@ -1,7 +1,5 @@
 package com.auroraapi.models;
 
-import com.auroraapi.Aurora;
-
 public class Text {
     private String text;
 
