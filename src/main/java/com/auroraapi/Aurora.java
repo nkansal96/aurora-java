@@ -7,6 +7,7 @@ import com.auroraapi.models.Text;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 import retrofit2.Response;
@@ -19,7 +20,7 @@ import java.lang.annotation.Annotation;
 
 public class Aurora {
 
-    private static final String BASE_URL_V1 = "https://api.auroraapi.com/v1";
+    private static final String BASE_URL_V1 = "https://api.auroraapi.com/v1/";
     private static Aurora instance;
     private static AuroraService service;
     private static Retrofit retrofit;
@@ -31,14 +32,18 @@ public class Aurora {
 
     public static void init(String appId, String appToken) {
         if (instance == null) {
-            Interceptor interceptor = chain -> chain.proceed(chain.request().newBuilder()
+            Interceptor authInterceptor = chain -> chain.proceed(chain.request().newBuilder()
                     .addHeader("X-Application-ID", appId)
                     .addHeader("X-Application-Token", appToken)
                     .build());
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(authInterceptor).build();
+
+            Moshi moshi = new Moshi.Builder()
+                    .add(new TextTypeAdapter()) // Converts type String to type Text
+                    .build();
             retrofit = new Retrofit.Builder()
-                    .addConverterFactory(MoshiConverterFactory.create())
+                    .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .baseUrl(BASE_URL_V1)
                     .client(client)
                     .build();
