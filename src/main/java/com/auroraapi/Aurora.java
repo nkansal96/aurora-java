@@ -13,6 +13,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
+import java.io.IOException;
+
 import java.lang.annotation.Annotation;
 
 public class Aurora {
@@ -59,7 +61,7 @@ public class Aurora {
         modelId = model;
     }
 
-    public static Text getText(Speech speech) throws Exception {
+    public static Text getText(Speech speech) throws AuroraException, IOException {
         Response<Text> response = service.getText(speech).execute();
         if (response.isSuccessful()) {
             return response.body();
@@ -69,7 +71,7 @@ public class Aurora {
         }
     }
 
-    public static Speech getSpeech(Text text) throws Exception {
+    public static Speech getSpeech(Text text) throws AuroraException, IOException {
         Response<Speech> response = service.getSpeech(text).execute();
         if (response.isSuccessful()) {
             return response.body();
@@ -79,7 +81,7 @@ public class Aurora {
         }
     }
 
-    public static Interpret getInterpretation(Text text) throws Exception {
+    public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
         Response<Interpret> response = service.getInterpret(text, modelId).execute();
         if (response.isSuccessful()) {
             return response.body();
