@@ -14,4 +14,8 @@ public class Speech {
     public void setAudio(Audio audio) {
         this.audio = audio;
     }
+
+    public static Speech listen(int length, float silence_len) {
+        return new Speech(Audio.record(length, silence_len));
+    }
 }
