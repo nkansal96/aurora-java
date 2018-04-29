@@ -10,7 +10,6 @@ class Audio {
   static final boolean SIGNED = true;
   static final boolean BIG_ENDIAN = true;
 
-  // format of audio file
   AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
 
   // the line from which audio data is captured
@@ -58,14 +57,9 @@ class Audio {
     System.out.println("Finished");
   }
 
-  /**
-   * Entry to run the program
-   */
   public static Audio record(int length, float silence_length) {
     final Audio audio = new Audio();
 
-    // creates a new thread that waits for a specified
-    // of time before stopping
     Thread stopper = new Thread(new Runnable() {
       public void run() {
         try {
@@ -79,7 +73,6 @@ class Audio {
 
     stopper.start();
 
-    // start recording
     audio.start();
 
     return audio;
