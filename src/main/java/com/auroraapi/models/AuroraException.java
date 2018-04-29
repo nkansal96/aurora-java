@@ -2,14 +2,14 @@ package com.auroraapi.models;
 
 public class AuroraException extends Exception {
 
-    String id;
-    String type;
-    String code;
-    int status;
-    String message;
+    private String id;
+    private String type;
+    private String code;
+    private int status;
+    private String message;
 
     public AuroraException(String message, String id, String type, String code, int status) {
-        super(message);
+        super();
         this.message = message;
         this.id = id;
         this.type = type;
@@ -50,6 +50,6 @@ public class AuroraException extends Exception {
      */
     @Override
     public String getMessage() {
-        return super.getMessage();
+        return message;
     }
 }
