@@ -1,21 +1,18 @@
 package com.auroraapi;
 
-import com.auroraapi.models.AuroraException;
-import com.auroraapi.models.Interpret;
-import com.auroraapi.models.Speech;
-import com.auroraapi.models.Text;
+import com.auroraapi.models.*;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import retrofit2.Converter;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.*;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
 import java.io.IOException;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 public class Aurora {
 
@@ -42,6 +39,7 @@ public class Aurora {
                     .add(new TextTypeAdapter()) // Converts type String to type Text
                     .build();
             Retrofit retrofit = new Retrofit.Builder()
+                    .addConverterFactory(new SpeechConverterFactory())
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .baseUrl(BASE_URL_V1)
                     .client(client)
@@ -61,7 +59,7 @@ public class Aurora {
         modelId = model;
     }
 
-    public static Text getText(Speech speech) throws AuroraException, IOException {
+    public static Transcript getText(Speech speech) throws AuroraException, IOException {
         checkInitialized();
         return returnOrThrow(service.getText(speech).execute());
     }
