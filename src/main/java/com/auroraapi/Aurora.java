@@ -7,7 +7,6 @@ import com.auroraapi.models.Text;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 import retrofit2.Response;
@@ -23,8 +22,7 @@ public class Aurora {
     private static final String BASE_URL_V1 = "https://api.auroraapi.com/v1/";
     private static Aurora instance;
     private static AuroraService service;
-    private static Retrofit retrofit;
-    private static Converter<ResponseBody, AuroraException> excpeptionConverter;
+    private static Converter<ResponseBody, AuroraException> exceptionConverter;
     private static String modelId;
 
     private Aurora(AuroraService auroraService) {
@@ -43,12 +41,12 @@ public class Aurora {
             Moshi moshi = new Moshi.Builder()
                     .add(new TextTypeAdapter()) // Converts type String to type Text
                     .build();
-            retrofit = new Retrofit.Builder()
+            Retrofit retrofit = new Retrofit.Builder()
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .baseUrl(BASE_URL_V1)
                     .client(client)
                     .build();
-            excpeptionConverter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
+            exceptionConverter = retrofit.responseBodyConverter(AuroraException.class, new Annotation[0]);
             instance = new Aurora(retrofit.create(AuroraService.class));
         }
     }
@@ -65,32 +63,17 @@ public class Aurora {
 
     public static Text getText(Speech speech) throws AuroraException, IOException {
         checkInitialized();
-        Response<Text> response = service.getText(speech).execute();
-        if (response.isSuccessful()) {
-            return response.body();
-        }
-
-        throw getAuroraException(response);
+        return returnOrThrow(service.getText(speech).execute());
     }
 
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
         checkInitialized();
-        Response<Speech> response = service.getSpeech(text).execute();
-        if (response.isSuccessful()) {
-            return response.body();
-        }
-
-        throw getAuroraException(response);
+        return returnOrThrow(service.getSpeech(text).execute());
     }
 
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
         checkInitialized();
-        Response<Interpret> response = service.getInterpret(text, modelId).execute();
-        if (response.isSuccessful()) {
-            return response.body();
-        }
-
-        throw getAuroraException(response);
+        return returnOrThrow(service.getInterpret(text, modelId).execute());
     }
 
     private static void checkInitialized() {
@@ -99,7 +82,28 @@ public class Aurora {
         }
     }
 
+    /**
+     * Will return response body if successful, otherwise will convert the API error to an AuroraException and throw
+     * @param response The Response obtained by executing a Request
+     * @param <T> The data type of the response body
+     * @return The response body
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
+    private static <T> T returnOrThrow(Response<T> response) throws IOException, AuroraException {
+        if (response.isSuccessful()) {
+            return response.body();
+        }
+        throw getAuroraException(response);
+    }
+
+    /**
+     * Converts a Response to an AuroraException
+     * @param response The Response obtained by executing a Request
+     * @return An AuroraException, which represents the API side error that occured
+     * @throws IOException if there was an error parsing the response as an AuroraException
+     */
     private static AuroraException getAuroraException(Response response) throws IOException {
-        return excpeptionConverter.convert(response.errorBody());
+        return exceptionConverter.convert(response.errorBody());
     }
 }
