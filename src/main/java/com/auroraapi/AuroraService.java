@@ -10,7 +10,6 @@ import retrofit2.http.*;
 public interface AuroraService {
 
     @GET("tts")
-    @Streaming
     Call<Speech> getSpeech(@Query("text") Text text);
 
     @Multipart
