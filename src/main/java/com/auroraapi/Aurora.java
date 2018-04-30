@@ -5,14 +5,13 @@ import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.*;
+import retrofit2.Converter;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
 import java.io.IOException;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 public class Aurora {
 
