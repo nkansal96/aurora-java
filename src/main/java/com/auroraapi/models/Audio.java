@@ -3,62 +3,91 @@ package com.auroraapi.models;
 import javax.sound.sampled.*;
 import java.io.*;
 
-class Audio {
-  static final int NUM_CHANNELS = 1;
-  static final int SAMPLE_SIZE = 16;
-  static final int RATE = 16000;
-  static final boolean SIGNED = true;
-  static final boolean BIG_ENDIAN = true;
+public class Audio {
+    static final int NUM_CHANNELS = 1;
+    static final int SAMPLE_SIZE = 16;
+    static final int RATE = 16000;
+    static final boolean SIGNED = true;
+    static final boolean BIG_ENDIAN = true;
 
-  AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+    AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
 
-  // the line from which audio data is captured
-  TargetDataLine line;
+    boolean isRecording = false;
 
-  AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
+    // the line from which audio data is captured
+    TargetDataLine line;
 
-  ByteArrayOutputStream data = new ByteArrayOutputStream();
+    AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
 
-  void start() {
-    try {
-      DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+    private byte[] data;
 
-      // checks if system supports the data line
-      if (!AudioSystem.isLineSupported(info)) {
-        System.out.println("Line not supported");
-        System.exit(0);
-      }
-      line = (TargetDataLine) AudioSystem.getLine(info);
-      line.open(format);
-      line.start();   // start capturing
-
-      System.out.println("Start capturing...");
-
-      AudioInputStream ais = new AudioInputStream(line);
-
-      System.out.println("Start recording...");
-
-      // start recording
-      AudioSystem.write(ais, fileType, data);
-
-    } catch (LineUnavailableException ex) {
-      ex.printStackTrace();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
+    public Audio() {
     }
-  }
 
-  /**
-   * Closes the target data line to finish capturing and recording
-   */
-  void finish() {
-    line.stop();
-    line.close();
-    System.out.println("Finished");
+    public Audio(byte[] data) {
+        setData(data);
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+        // this.data = Arrays.copyOf(data, data.length);
+    }
+
+    public String getContentType() {
+        return "audio/x-wav";
+    }
+
+    public void play() {
+        try {
+            Clip clip = AudioSystem.getClip();
+            clip.open(format, data, 0, data.length);
+            clip.start();
+        } catch (LineUnavailableException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void startRecording() {
+        try {
+            ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+
+            if (!AudioSystem.isLineSupported(info)) {
+                System.out.println("Line not supported");
+                System.exit(0);
+            }
+            line = (TargetDataLine) AudioSystem.getLine(info);
+            line.open(format);
+            line.start();
+
+            byte[] bytes = new byte[line.getBufferSize() / 5];
+            int numBytesRead;
+            while (isRecording) {
+                numBytesRead = line.read(bytes, 0, bytes.length);
+                dataStream.write(bytes, 0, numBytesRead);
+            }
+            line.stop();
+            line.close();
+
+            byte[] dataBytes = dataStream.toByteArray();
+            setData(dataBytes);
+
+        } catch (LineUnavailableException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+  private void finishRecording() {
+      isRecording = false;
   }
 
   public static Audio record(int length, float silence_length) {
     final Audio audio = new Audio();
+    audio.isRecording = true;
 
     Thread stopper = new Thread(new Runnable() {
       public void run() {
@@ -67,32 +96,14 @@ class Audio {
         } catch (InterruptedException ex) {
           ex.printStackTrace();
         }
-        audio.finish();
+        audio.finishRecording();
       }
     });
 
     stopper.start();
 
-    audio.start();
+    audio.startRecording();
 
     return audio;
-  }
-
-  private byte[] data;
-
-  public Audio(byte[] data) {
-      setData(data);
-  }
-
-  public byte[] getData() {
-      return data;
-  }
-
-  public void setData(byte[] data) {
-      this.data = data;
-  }
-
-  public String getContentType() {
-      return "audio/x-wav";
   }
 }
