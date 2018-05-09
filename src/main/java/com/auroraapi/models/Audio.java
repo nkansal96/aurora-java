@@ -46,8 +46,11 @@ public class Audio {
             Clip clip = AudioSystem.getClip();
             clip.open(format, data, 0, data.length);
             clip.start();
+            Thread.sleep(2000);
         } catch (LineUnavailableException ex) {
             ex.printStackTrace();
+        } catch (InterruptedException ex) {
+
         }
     }
 
@@ -81,29 +84,39 @@ public class Audio {
         }
     }
 
-  private void finishRecording() {
-      isRecording = false;
-  }
+    private void finishRecording() {
+        isRecording = false;
+    }
 
-  public static Audio record(int length, float silence_length) {
-    final Audio audio = new Audio();
-    audio.isRecording = true;
+    public static Audio record(int length, float silence_length) {
+        final Audio audio = new Audio();
+        audio.isRecording = true;
 
-    Thread stopper = new Thread(new Runnable() {
-      public void run() {
-        try {
-          Thread.sleep(length * 1000);
-        } catch (InterruptedException ex) {
-          ex.printStackTrace();
-        }
-        audio.finishRecording();
-      }
-    });
+        Thread stopper = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(length * 1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                audio.finishRecording();
+            }
+        });
 
-    stopper.start();
+        stopper.start();
+        audio.startRecording();
 
-    audio.startRecording();
+        return audio;
+    }
 
-    return audio;
-  }
+    public void writeToFile(String filename) throws IOException {
+        File wavFile = new File(filename);
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        AudioInputStream audioInputStream = new AudioInputStream(bais, format,
+                data.length / format.getFrameSize());
+
+        AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, wavFile);
+
+        audioInputStream.close();
+    }
 }

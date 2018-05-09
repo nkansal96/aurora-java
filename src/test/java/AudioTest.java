@@ -1,21 +1,30 @@
 import com.auroraapi.models.Audio;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 public class AudioTest {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("starting test...");
 
-        Audio audio = new Audio();
 
         System.out.println("recording...");
-        audio.record(2, 0);
+        Audio audio = Audio.record(2, 0);
 
         System.out.println("finished recording...");
-        Thread.sleep(1000);
 
         System.out.println("playing back...");
         audio.play();
 
-        Thread.sleep(4000);
+        try {
+            audio.writeToFile("test.wav");
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        // Thread.sleep(4000);
 
         System.out.println("done...");
     }
