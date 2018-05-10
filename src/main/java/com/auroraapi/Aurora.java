@@ -70,7 +70,7 @@ public class Aurora {
     }
 
     /**
-     * Aurora stt
+     * Aurora speech to text
      * @param Text User input text
      * @return Aurora transcribed text from provided speech
      * @throws IOException if there is an error parsing the response
@@ -82,7 +82,7 @@ public class Aurora {
     }
 
     /**
-     * Aurora tts
+     * Aurora text to speech
      * @param Text User input text
      * @return Aurora transcribed speech from provided text
      * @throws IOException if there is an error parsing the response
@@ -94,7 +94,7 @@ public class Aurora {
     }
 
     /**
-     * Aurora interpretation
+     * Aurora text to interpretation
      * @param Text User input text
      * @return Aurora interpretation from provided text
      * @throws IOException if there is an error parsing the response
