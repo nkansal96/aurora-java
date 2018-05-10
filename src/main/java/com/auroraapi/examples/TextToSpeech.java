@@ -1,3 +1,5 @@
+package com.auroraapi.examples;
+
 import com.auroraapi.Aurora;
 import com.auroraapi.models.Audio;
 import com.auroraapi.models.AuroraException;
