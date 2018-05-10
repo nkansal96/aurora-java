@@ -25,6 +25,13 @@ public class Aurora {
         service = auroraService;
     }
 
+    /**
+     * Initializes and authenticates an instance of Aurora
+     * @param String appId User's Application ID
+     * @param String appToken
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
     public static void init(String appId, String appToken) {
         if (instance == null) {
             Interceptor authInterceptor = chain -> chain.proceed(chain.request().newBuilder()
