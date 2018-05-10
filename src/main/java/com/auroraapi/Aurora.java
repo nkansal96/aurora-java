@@ -55,6 +55,10 @@ public class Aurora {
         }
     }
 
+    /**
+     * Initializes a mock instance of Aurora for testing purposes
+     * @param AuroraService auroraService User's custom service
+     */
     public static void init(AuroraService auroraService) {
         if (instance == null) {
             instance = new Aurora(auroraService);
@@ -65,21 +69,46 @@ public class Aurora {
         modelId = model;
     }
 
+    /**
+     * Aurora stt
+     * @param Text User input text
+     * @return Aurora transcribed text from provided speech
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
     public static Transcript getText(Speech speech) throws AuroraException, IOException {
         checkInitialized();
         return returnOrThrow(service.getText(speech).execute());
     }
 
+    /**
+     * Aurora tts
+     * @param Text User input text
+     * @return Aurora transcribed speech from provided text
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
         checkInitialized();
         return returnOrThrow(service.getSpeech(text).execute());
     }
 
+    /**
+     * Aurora interpretation
+     * @param Text User input text
+     * @return Aurora interpretation from provided text
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
         checkInitialized();
         return returnOrThrow(service.getInterpret(text, modelId).execute());
     }
 
+    /**
+     * Checks if current instance of Aurora is initialized and ready for use
+     * @throws RuntimeException if instance has not been initialized
+     */
     private static void checkInitialized() {
         if (instance == null) {
             throw new RuntimeException("Please call Aurora.init() first");

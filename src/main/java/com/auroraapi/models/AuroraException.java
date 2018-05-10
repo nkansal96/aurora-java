@@ -8,6 +8,9 @@ public class AuroraException extends Exception {
     private int status;
     private String message;
 
+    /**
+     * AuroraException is the Exception that is thrown from API calls.
+     */
     public AuroraException(String message, String id, String type, String code, int status) {
         super();
         this.message = message;
