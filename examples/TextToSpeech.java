@@ -1,8 +1,8 @@
-import com.aurora.Aurora;
-import com.aurora.models.Audio;
-import com.aurora.models.AuroraException;
-import com.aurora.models.Speech;
-import com.aurora.models.Text;
+import com.auroraapi.Aurora;
+import com.auroraapi.models.Audio;
+import com.auroraapi.models.AuroraException;
+import com.auroraapi.models.Speech;
+import com.auroraapi.models.Text;
 
 public class TextToSpeechExample {
     public static void main(String[] args) {
