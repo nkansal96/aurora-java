@@ -6,7 +6,9 @@ import com.auroraapi.models.AuroraException;
 import com.auroraapi.models.Speech;
 import com.auroraapi.models.Text;
 
-public class TextToSpeechExample {
+import java.io.IOException;
+
+public class TextToSpeech {
     public static void main(String[] args) {
         String appId = "<put your appId here>";
         String appToken = "<put your appToken here>";
@@ -23,6 +25,8 @@ public class TextToSpeechExample {
             // TODO: Uncomment when audio has play implemented
             // audio.play();
         } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
