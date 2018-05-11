@@ -43,8 +43,22 @@ public class Audio {
     }
 
     public void play() {
-        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        AudioPlayer.player.start(bais);
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            AudioInputStream audioStream = new AudioInputStream(bais, format,
+                    data.length / format.getFrameSize());
+            AudioFormat audioFormat = audioStream.getFormat();
+            DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
+            Clip clip = (Clip) AudioSystem.getLine(info);
+            clip.open(audioStream);
+            clip.start();
+            while (!clip.isRunning())
+                Thread.sleep(10);
+            while (clip.isRunning())
+                Thread.sleep(10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void startRecording() {
