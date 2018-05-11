@@ -58,9 +58,9 @@ public class Aurora {
         modelId = model;
     }
 
-    public static Transcript getText(Speech speech) throws AuroraException, IOException {
+    public static Transcript getTranscript(Speech speech) throws AuroraException, IOException {
         checkInitialized();
-        return returnOrThrow(service.getText(speech).execute());
+        return returnOrThrow(service.getTranscript(speech).execute());
     }
 
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
