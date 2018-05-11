@@ -1,5 +1,9 @@
 package com.auroraapi.models;
 
+/** Aurora Exception is the Excpeption thrown for API calls.
+ * @version 1.5
+ * @since 1.0
+ */
 public class AuroraException extends Exception {
 
     private String id;
