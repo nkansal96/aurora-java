@@ -1,24 +1,21 @@
 package com.auroraapi.models;
 
-import sun.audio.AudioPlayer;
-
 import javax.sound.sampled.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
+/**
+ * Currently only supports WAVE filetype, but can be extended to support other filetypes
+ */
 public class Audio {
-    static final int NUM_CHANNELS = 1;
-    static final int SAMPLE_SIZE = 16;
-    static final int RATE = 16000;
-    static final boolean SIGNED = true;
-    static final boolean BIG_ENDIAN = true;
-
-    AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
-
-    boolean isRecording = false;
-
-    TargetDataLine line;
-
-    AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
+    private static final int NUM_CHANNELS = 1;
+    private static final int SAMPLE_SIZE = 16;
+    private static final int RATE = 16000;
+    private static final boolean SIGNED = true;
+    private static final boolean BIG_ENDIAN = false;
+    private static final AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
 
     private byte[] data;
 
@@ -27,6 +24,30 @@ public class Audio {
 
     public Audio(byte[] data) {
         setData(data);
+    }
+
+    /**
+     * Records audio and returns a new Audio object containing the recorded audio
+     * @param millis The millis of time, in milliseconds, to record
+     * @param silenceLength TODO: describe what this is
+     * @return A new Audio object containing the recorded audio
+     * @throws LineUnavailableException If the mic is unavailble
+     */
+    public static Audio record(long millis, float silenceLength) throws LineUnavailableException {
+        ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
+        TargetDataLine line = AudioSystem.getTargetDataLine(format);
+        byte[] buffer = new byte[line.getBufferSize()];
+        line.open(format);
+        line.start();
+
+        long stopTime = System.currentTimeMillis() + millis;
+        while (System.currentTimeMillis() < stopTime) {
+            int numBytesRead = line.read(buffer, 0, buffer.length);
+            audioByteData.write(buffer, 0, numBytesRead);
+        }
+        line.stop();
+        line.close();
+        return new Audio(audioByteData.toByteArray());
     }
 
     public byte[] getData() {
@@ -44,85 +65,34 @@ public class Audio {
 
     /**
      * Plays back the audio contained in this object
+     * @param shouldBlock Whether to make playing the audio a blocking operation
+     * @throws LineUnavailableException If the speaker is not available
+     * @throws InterruptedException If the audio is unable finish playing
      */
-    public void play() {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            AudioInputStream audioStream = new AudioInputStream(bais, format,
-                    data.length / format.getFrameSize());
-            AudioFormat audioFormat = audioStream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
-            Clip clip = (Clip) AudioSystem.getLine(info);
-            clip.open(audioStream);
-            clip.start();
-            while (!clip.isRunning())
+    public void play(boolean shouldBlock) throws LineUnavailableException, InterruptedException {
+        DataLine.Info info = new DataLine.Info(Clip.class, format);
+        Clip clip = (Clip) AudioSystem.getLine(info);
+        clip.open(format, data, 0, data.length);
+        clip.start();
+        if (shouldBlock) {
+            // wait for clip to start playing
+            while (!clip.isRunning()) {
                 Thread.sleep(10);
-            while (clip.isRunning())
+            }
+            // wait for clip to finish playing
+            while (clip.isRunning()) {
                 Thread.sleep(10);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void startRecording() {
-        try {
-            ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-
-            if (!AudioSystem.isLineSupported(info)) {
-                System.out.println("Line not supported");
-                System.exit(0);
             }
-            line = (TargetDataLine) AudioSystem.getLine(info);
-            line.open(format);
-            line.start();
-
-            byte[] bytes = new byte[line.getBufferSize() / 5];
-            int numBytesRead;
-            while (isRecording) {
-                numBytesRead = line.read(bytes, 0, bytes.length);
-                dataStream.write(bytes, 0, numBytesRead);
-            }
-            line.stop();
-            line.close();
-
-            byte[] dataBytes = dataStream.toByteArray();
-            setData(dataBytes);
-
-        } catch (LineUnavailableException ex) {
-            ex.printStackTrace();
         }
-    }
-
-    private void finishRecording() {
-        isRecording = false;
     }
 
     /**
-     * Records audio and returns a new Audio object containing the recorded audio
-     * @param length The length of time, in seconds, to record
-     * @param silenceLength TODO: describe what this is
-     * @return A new Audio object containing the recorded audio
+     * Plays back the audio contained in this object (blocking)
+     * @throws LineUnavailableException If the speaker is not available
+     * @throws InterruptedException If the audio is unable finish playing
      */
-    public static Audio record(int length, float silenceLength) {
-        final Audio audio = new Audio();
-        audio.isRecording = true;
-
-        Thread stopper = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(length * 1000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                audio.finishRecording();
-            }
-        });
-
-        stopper.start();
-        audio.startRecording();
-
-        return audio;
+    public void play() throws LineUnavailableException, InterruptedException {
+        play(true);
     }
 
     /**
