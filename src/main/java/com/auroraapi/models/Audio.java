@@ -42,6 +42,9 @@ public class Audio {
         return "audio/x-wav";
     }
 
+    /**
+     * Plays back the audio contained in this object
+     */
     public void play() {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -95,7 +98,13 @@ public class Audio {
         isRecording = false;
     }
 
-    public static Audio record(int length, float silence_length) {
+    /**
+     * Records audio and returns a new Audio object containing the recorded audio
+     * @param length The length of time, in seconds, to record
+     * @param silenceLength TODO: describe what this is
+     * @return A new Audio object containing the recorded audio
+     */
+    public static Audio record(int length, float silenceLength) {
         final Audio audio = new Audio();
         audio.isRecording = true;
 
@@ -116,6 +125,11 @@ public class Audio {
         return audio;
     }
 
+    /**
+     * Write the audio data contained in this object to a wav file
+     * @param filename The name of the file to write to, should end in ".wav"
+     * @throws IOException if there is an error writing the file
+     */
     public void writeToFile(String filename) throws IOException {
         File wavFile = new File(filename);
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
