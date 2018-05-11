@@ -68,7 +68,7 @@ public class Aurora {
     public static void setModel(String model) {
         modelId = model;
     }
-
+    
     /**
      * Aurora speech to text
      * @param Text User input text
@@ -76,9 +76,9 @@ public class Aurora {
      * @throws IOException if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
-    public static Transcript getText(Speech speech) throws AuroraException, IOException {
+    public static Transcript getTranscript(Speech speech) throws AuroraException, IOException {
         checkInitialized();
-        return returnOrThrow(service.getText(speech).execute());
+        return returnOrThrow(service.getTranscript(speech).execute());
     }
 
     /**
