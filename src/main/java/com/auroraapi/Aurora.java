@@ -19,7 +19,6 @@ public class Aurora {
     private static Aurora instance;
     private static AuroraService service;
     private static Converter<ResponseBody, AuroraException> exceptionConverter;
-    private static String modelId;
 
     private Aurora(AuroraService auroraService) {
         service = auroraService;
@@ -27,16 +26,25 @@ public class Aurora {
 
     /**
      * Initializes and authenticates an instance of Aurora
-     * @param String appId User's Application ID
-     * @param String appToken
-     * @throws IOException if there is an error parsing the response
-     * @throws AuroraException if there is an API-side error
+     * @param appId The App ID obtained from the Aurora Dashboard
+     * @param appToken The App Token obtained from the Aurora Dashboard
      */
     public static void init(String appId, String appToken) {
+        init(appId, appToken, null);
+    }
+
+    /**
+     * Initializes and authenticates an instance of Aurora
+     * @param appId The App ID obtained from the Aurora Dashboard
+     * @param appToken The App Token obtained from the Aurora Dashboard
+     * @param deviceId The Device ID for analytics on Aurora Dashboard
+     */
+    public static void init(String appId, String appToken, String deviceId) {
         if (instance == null) {
             Interceptor authInterceptor = chain -> chain.proceed(chain.request().newBuilder()
                     .addHeader("X-Application-ID", appId)
                     .addHeader("X-Application-Token", appToken)
+                    .addHeader("X-Device-ID", deviceId)
                     .build());
 
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(authInterceptor).build();
@@ -57,7 +65,7 @@ public class Aurora {
 
     /**
      * Initializes a mock instance of Aurora for testing purposes
-     * @param AuroraService auroraService User's custom service
+     * @param auroraService auroraService User's custom service
      */
     public static void init(AuroraService auroraService) {
         if (instance == null) {
@@ -65,14 +73,10 @@ public class Aurora {
         }
     }
 
-    public static void setModel(String model) {
-        modelId = model;
-    }
-    
     /**
-     * Aurora speech to text
-     * @param Text User input text
-     * @return Aurora transcribed text from provided speech
+     * Converts speech to text
+     * @param speech User speech
+     * @return Transcript of provided speech
      * @throws IOException if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
@@ -82,8 +86,8 @@ public class Aurora {
     }
 
     /**
-     * Aurora text to speech
-     * @param Text User input text
+     * Converts text to speech
+     * @param text User input text
      * @return Aurora transcribed speech from provided text
      * @throws IOException if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
@@ -94,15 +98,27 @@ public class Aurora {
     }
 
     /**
-     * Aurora text to interpretation
-     * @param Text User input text
+     * Get the interpretation of some Text
+     * @param text User input text
+     * @param modelId The ID of the model to query
+     * @return Aurora interpretation from provided text
+     * @throws IOException if there is an error parsing the response
+     * @throws AuroraException if there is an API-side error
+     */
+    public static Interpret getInterpretation(Text text, String modelId) throws AuroraException, IOException {
+        checkInitialized();
+        return returnOrThrow(service.getInterpret(text, modelId).execute());
+    }
+
+    /**
+     * Get the interpretation of some Text
+     * @param text User input text
      * @return Aurora interpretation from provided text
      * @throws IOException if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
-        checkInitialized();
-        return returnOrThrow(service.getInterpret(text, modelId).execute());
+        return getInterpretation(text, null);
     }
 
     /**

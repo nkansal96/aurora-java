@@ -1,8 +1,6 @@
 package com.auroraapi.models;
 
-/** Aurora Exception is the Excpeption thrown for API calls.
- * @version 1.5
- * @since 1.0
+/** Aurora Exception is the Exception thrown for API calls.
  */
 public class AuroraException extends Exception {
 
@@ -12,9 +10,6 @@ public class AuroraException extends Exception {
     private int status;
     private String message;
 
-    /**
-     * AuroraException is the Exception that is thrown from API calls.
-     */
     public AuroraException(String message, String id, String type, String code, int status) {
         super();
         this.message = message;
