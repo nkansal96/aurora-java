@@ -1,5 +1,7 @@
 package com.auroraapi.models;
 
+import sun.audio.AudioPlayer;
+
 import javax.sound.sampled.*;
 import java.io.*;
 
@@ -14,7 +16,6 @@ public class Audio {
 
     boolean isRecording = false;
 
-    // the line from which audio data is captured
     TargetDataLine line;
 
     AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
@@ -42,16 +43,8 @@ public class Audio {
     }
 
     public void play() {
-        try {
-            Clip clip = AudioSystem.getClip();
-            clip.open(format, data, 0, data.length);
-            clip.start();
-            Thread.sleep(2000);
-        } catch (LineUnavailableException ex) {
-            ex.printStackTrace();
-        } catch (InterruptedException ex) {
-
-        }
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        AudioPlayer.player.start(bais);
     }
 
     private void startRecording() {
