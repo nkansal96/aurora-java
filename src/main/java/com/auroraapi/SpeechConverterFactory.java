@@ -12,6 +12,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 public class SpeechConverterFactory extends Converter.Factory {
+    /**
+     * Converts a ResponseBody if it is of Type Speech
+     * @param Type type is
+     * @return Speech or null
+     */
     @Override
     public Converter<ResponseBody, Speech> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
         return type == Speech.class ? responseBody -> {
@@ -21,6 +26,11 @@ public class SpeechConverterFactory extends Converter.Factory {
         } : null;
     }
 
+    /**
+     * Converts a RequestBody if it is of Type Speech
+     * @param Type type is
+     * @return Speech or null
+     */
     @Override
     public Converter<Speech, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
         return type == Speech.class ? speech -> RequestBody.create(MediaType.parse(speech.getAudio().getContentType()), speech.getAudio().getData()) : null;
