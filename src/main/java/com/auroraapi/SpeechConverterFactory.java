@@ -14,7 +14,6 @@ import java.lang.reflect.Type;
 public class SpeechConverterFactory extends Converter.Factory {
     /**
      * Converts a ResponseBody if it is of Type Speech
-     * @param Type type is
      * @return Speech or null
      */
     @Override
@@ -28,7 +27,6 @@ public class SpeechConverterFactory extends Converter.Factory {
 
     /**
      * Converts a RequestBody if it is of Type Speech
-     * @param Type type is
      * @return Speech or null
      */
     @Override
