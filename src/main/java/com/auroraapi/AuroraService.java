@@ -12,9 +12,8 @@ public interface AuroraService {
     @GET("tts")
     Call<Speech> getSpeech(@Query("text") Text text);
 
-    @Multipart
     @POST("stt")
-    Call<Transcript> getTranscript(@Part("speech") Speech speech);
+    Call<Transcript> getTranscript(@Body Speech speech);
 
     @GET("interpret")
     Call<Interpret> getInterpret(@Query("text") Text text, @Query("model") String model);
