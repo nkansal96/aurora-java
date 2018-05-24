@@ -4,6 +4,7 @@ import com.auroraapi.models.*;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 import retrofit2.Response;
@@ -41,11 +42,15 @@ public class Aurora {
      */
     public static void init(String appId, String appToken, String deviceId) {
         if (instance == null) {
-            Interceptor authInterceptor = chain -> chain.proceed(chain.request().newBuilder()
-                    .addHeader("X-Application-ID", appId)
-                    .addHeader("X-Application-Token", appToken)
-                    .addHeader("X-Device-ID", deviceId)
-                    .build());
+            Interceptor authInterceptor = chain -> {
+                Request.Builder builder = chain.request().newBuilder()
+                        .addHeader("X-Application-ID", appId)
+                        .addHeader("X-Application-Token", appToken);
+                if (deviceId != null) {
+                    builder.addHeader("X-Device-ID", deviceId);
+                }
+                return chain.proceed(builder.build());
+            };
 
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(authInterceptor).build();
 
