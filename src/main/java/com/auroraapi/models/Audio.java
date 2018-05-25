@@ -5,6 +5,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static com.auroraapi.util.AudioUtils.isSilent;
 
 /**
  * Currently only supports WAVE filetype, but can be extended to support other filetypes
@@ -29,11 +33,10 @@ public class Audio {
     /**
      * Records audio and returns a new Audio object containing the recorded audio
      * @param millis The millis of time, in milliseconds, to record
-     * @param silenceLength TODO: describe what this is
      * @return A new Audio object containing the recorded audio
      * @throws LineUnavailableException If the mic is unavailble
      */
-    public static Audio record(long millis, float silenceLength) throws LineUnavailableException {
+    public static Audio timedRecord(long millis) throws LineUnavailableException {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
         TargetDataLine line = AudioSystem.getTargetDataLine(format);
         byte[] buffer = new byte[line.getBufferSize()];
@@ -48,6 +51,56 @@ public class Audio {
         line.stop();
         line.close();
         return new Audio(audioByteData.toByteArray());
+    }
+
+    /**
+     * Keeps recording until silence is encountered
+     * @param silenceLength the length of silence at which to stop stop recording in milliseconds
+     * @return A new Audio object containing the recorded audio
+     */
+    public static Audio silenceRecord(long silenceLength) throws LineUnavailableException, IOException {
+        // TODO: This is completely untested and not sure if it works yet
+        ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
+        ByteArrayOutputStream silenceAudio = new ByteArrayOutputStream();
+        TargetDataLine line = AudioSystem.getTargetDataLine(format);
+        byte[] buffer = new byte[line.getBufferSize()];
+        line.open(format);
+        line.start();
+        boolean wasPreviouslySilent = false;
+        long silenceStartTime = System.currentTimeMillis();
+        long elapsedSilence = 0;
+        while (elapsedSilence < silenceLength) {
+            int numBytesRead = line.read(buffer, 0, buffer.length);
+            if (isSilent(buffer, numBytesRead)) {
+                if (!wasPreviouslySilent) {
+                    wasPreviouslySilent = true;
+                    silenceStartTime = System.currentTimeMillis();
+                }
+                elapsedSilence = System.currentTimeMillis() - silenceStartTime;
+                silenceAudio.write(buffer, 0, numBytesRead);
+            } else {
+                wasPreviouslySilent = false;
+                elapsedSilence = 0;
+                if (silenceAudio.size() > 0) {
+                    audioByteData.write(silenceAudio.toByteArray());
+                    silenceAudio.reset();
+                }
+                audioByteData.write(buffer, 0, numBytesRead);
+            }
+        }
+        line.stop();
+        line.close();
+        return new Audio(audioByteData.toByteArray());
+    }
+
+    /**
+     * Create an Audio instance by copying data over from a file
+     * @param pathname the filename/path
+     * @return A new Audio object containing the file data
+     * @throws IOException If there is an error reading from file
+     */
+    public static Audio fromFile(String pathname) throws IOException {
+        return new Audio(Files.readAllBytes(Paths.get(pathname)));
     }
 
     public byte[] getData() {
