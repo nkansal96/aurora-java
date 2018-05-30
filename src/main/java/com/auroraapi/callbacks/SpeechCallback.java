@@ -1,4 +1,6 @@
-package com.auroraapi.models;
+package com.auroraapi.callbacks;
+
+import com.auroraapi.models.Speech;
 
 public interface SpeechCallback {
     /**

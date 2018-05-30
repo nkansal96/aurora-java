@@ -1,5 +1,7 @@
 package com.auroraapi;
 
+import com.auroraapi.callbacks.SpeechCallback;
+import com.auroraapi.callbacks.TranscriptCallback;
 import com.auroraapi.models.*;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
