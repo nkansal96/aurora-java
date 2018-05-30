@@ -6,11 +6,10 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
-import retrofit2.Converter;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import retrofit2.*;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 
@@ -124,6 +123,36 @@ public class Aurora {
      */
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
         return getInterpretation(text, null);
+    }
+
+    /**
+     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     * @param silenceLength The length of silence to wait for between submitting chunks for Transcript
+     */
+    public static void continuouslyListen(TranscriptCallback callback, long silenceLength) {
+        checkInitialized();
+        new Thread(() -> {
+            boolean shouldContinue = true;
+            while (shouldContinue) {
+                try {
+                    Transcript transcript = getTranscript(Speech.listenUntilSilence(silenceLength));
+                    if (transcript != null && transcript.getTranscript() != null && transcript.getTranscript().length() > 0) {
+                        shouldContinue = callback.onTranscript(transcript);
+                    }
+                } catch (AuroraException | IOException | LineUnavailableException e) {
+                    shouldContinue = callback.onError(e);
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     */
+    public static void continuouslyListen(TranscriptCallback callback) {
+        continuouslyListen(callback, Speech.DEFAULT_SILENCE_LENGTH);
     }
 
     /**

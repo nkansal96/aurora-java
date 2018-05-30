@@ -7,7 +7,7 @@ public class AudioTest {
         System.out.println("starting test...");
 
         System.out.println("recording...");
-        Audio audio = Audio.record(2000, 0);
+        Audio audio = Audio.timedRecord(2000);
 
         System.out.println("playing back...");
         audio.play();
