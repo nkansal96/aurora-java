@@ -26,7 +26,8 @@ public class Aurora {
 
     /**
      * Initializes and authenticates an instance of Aurora
-     * @param appId The App ID obtained from the Aurora Dashboard
+     *
+     * @param appId    The App ID obtained from the Aurora Dashboard
      * @param appToken The App Token obtained from the Aurora Dashboard
      */
     public static void init(String appId, String appToken) {
@@ -35,7 +36,8 @@ public class Aurora {
 
     /**
      * Initializes and authenticates an instance of Aurora
-     * @param appId The App ID obtained from the Aurora Dashboard
+     *
+     * @param appId    The App ID obtained from the Aurora Dashboard
      * @param appToken The App Token obtained from the Aurora Dashboard
      * @param deviceId The Device ID for analytics on Aurora Dashboard
      */
@@ -45,7 +47,7 @@ public class Aurora {
                 Request.Builder builder = chain.request().newBuilder()
                         .addHeader("X-Application-ID", appId)
                         .addHeader("X-Application-Token", appToken);
-                if (deviceId != null) {
+                if (deviceId != null && deviceId.length() > 0) {
                     builder.addHeader("X-Device-ID", deviceId);
                 }
                 return chain.proceed(builder.build());
@@ -69,6 +71,7 @@ public class Aurora {
 
     /**
      * Initializes a mock instance of Aurora for testing purposes
+     *
      * @param auroraService auroraService User's custom service
      */
     public static void init(AuroraService auroraService) {
@@ -79,9 +82,10 @@ public class Aurora {
 
     /**
      * Converts speech to text
+     *
      * @param speech User speech
      * @return Transcript of provided speech
-     * @throws IOException if there is an error parsing the response
+     * @throws IOException     if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     public static Transcript getTranscript(Speech speech) throws AuroraException, IOException {
@@ -91,9 +95,10 @@ public class Aurora {
 
     /**
      * Converts text to speech
+     *
      * @param text User input text
      * @return Aurora transcribed speech from provided text
-     * @throws IOException if there is an error parsing the response
+     * @throws IOException     if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     public static Speech getSpeech(Text text) throws AuroraException, IOException {
@@ -103,10 +108,11 @@ public class Aurora {
 
     /**
      * Get the interpretation of some Text
-     * @param text User input text
+     *
+     * @param text    User input text
      * @param modelId The ID of the model to query
      * @return Aurora interpretation from provided text
-     * @throws IOException if there is an error parsing the response
+     * @throws IOException     if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     public static Interpret getInterpretation(Text text, String modelId) throws AuroraException, IOException {
@@ -116,31 +122,31 @@ public class Aurora {
 
     /**
      * Get the interpretation of some Text
+     *
      * @param text User input text
      * @return Aurora interpretation from provided text
-     * @throws IOException if there is an error parsing the response
+     * @throws IOException     if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
+        checkInitialized();
         return getInterpretation(text, null);
     }
 
     /**
-     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
-     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
-     * @param silenceLength The length of silence to wait for between submitting chunks for Transcript
+     * Continuously listen for audio and return the Speech segments as they are recorded
+     *
+     * @param callback      The callback that is invoked on every receipt of some Speech
+     * @param silenceLength The length of silence to wait for between Speech chunks
      */
-    public static void continuouslyListen(TranscriptCallback callback, long silenceLength) {
+    public static void continuouslyListen(SpeechCallback callback, long silenceLength) {
         checkInitialized();
         new Thread(() -> {
             boolean shouldContinue = true;
             while (shouldContinue) {
                 try {
-                    Transcript transcript = getTranscript(Speech.listenUntilSilence(silenceLength));
-                    if (transcript != null && transcript.getTranscript() != null && transcript.getTranscript().length() > 0) {
-                        shouldContinue = callback.onTranscript(transcript);
-                    }
-                } catch (AuroraException | IOException | LineUnavailableException e) {
+                    shouldContinue = callback.onSpeech(Speech.listenUntilSilence(silenceLength));
+                } catch (IOException | LineUnavailableException e) {
                     shouldContinue = callback.onError(e);
                 }
             }
@@ -148,15 +154,80 @@ public class Aurora {
     }
 
     /**
-     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
+     * Continuously listen for audio and return the Speech segments as they are recorded
+     *
      * @param callback The callback that is invoked on every receipt of Transcript for some Speech
      */
-    public static void continuouslyListen(TranscriptCallback callback) {
+    public static void continuouslyListen(SpeechCallback callback) {
+        checkInitialized();
         continuouslyListen(callback, Speech.DEFAULT_SILENCE_LENGTH);
     }
 
     /**
+     * Directly get the Transcript for one Speech segment
+     *
+     * @param silenceLength The length of silence to wait for before stopping recording
+     * @return A Transcript of the user's Speech
+     * @throws LineUnavailableException if there is an error recording audio
+     * @throws IOException              if there is an error parsing the response
+     * @throws AuroraException          if there is an API-side error
+     */
+    public static Transcript listenAndTranscribe(long silenceLength) throws IOException, LineUnavailableException, AuroraException {
+        checkInitialized();
+        return getTranscript(Speech.listenUntilSilence(silenceLength));
+    }
+
+    /**
+     * Directly get the Transcript for one Speech segment
+     *
+     * @return A Transcript of the user's Speech
+     * @throws LineUnavailableException if there is an error recording audio
+     * @throws IOException              if there is an error parsing the response
+     * @throws AuroraException          if there is an API-side error
+     */
+    public static Transcript listenAndTranscribe() throws AuroraException, IOException, LineUnavailableException {
+        checkInitialized();
+        return listenAndTranscribe(Speech.DEFAULT_SILENCE_LENGTH);
+    }
+
+    /**
+     * Continuously listen and automatically get the Transcript for chunks of recorded speech
+     *
+     * @param callback      The callback that is invoked on every receipt of Transcript for some Speech
+     * @param silenceLength The length of silence to wait for between submitting chunks for Transcript
+     */
+    public static void continuouslyListenAndTranscribe(TranscriptCallback callback, long silenceLength) {
+        checkInitialized();
+        continuouslyListen(new SpeechCallback() {
+            @Override
+            public boolean onSpeech(Speech speech) {
+                try {
+                    return callback.onTranscript(getTranscript(speech));
+                } catch (AuroraException | IOException e) {
+                    return callback.onError(e);
+                }
+            }
+
+            @Override
+            public boolean onError(Throwable throwable) {
+                return callback.onError(throwable);
+            }
+        }, silenceLength);
+    }
+
+    /**
+     * Continuously listen and automatically get the Transcript for chunks of recorded speech
+     *
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     */
+    public static void continuouslyListenAndTranscribe(TranscriptCallback callback) {
+        checkInitialized();
+        continuouslyListenAndTranscribe(callback, Speech.DEFAULT_SILENCE_LENGTH);
+    }
+
+    /**
      * Checks if current instance of Aurora is initialized and ready for use
+     *
      * @throws RuntimeException if instance has not been initialized
      */
     private static void checkInitialized() {
@@ -167,10 +238,11 @@ public class Aurora {
 
     /**
      * Will return response body if successful, otherwise will convert the API error to an AuroraException and throw
+     *
      * @param response The Response obtained by executing a Request
-     * @param <T> The data type of the response body
+     * @param <T>      The data type of the response body
      * @return The response body
-     * @throws IOException if there is an error parsing the response
+     * @throws IOException     if there is an error parsing the response
      * @throws AuroraException if there is an API-side error
      */
     private static <T> T returnOrThrow(Response<T> response) throws IOException, AuroraException {
@@ -182,6 +254,7 @@ public class Aurora {
 
     /**
      * Converts a Response to an AuroraException
+     *
      * @param response The Response obtained by executing a Request
      * @return An AuroraException, which represents the API side error that occured
      * @throws IOException if there was an error parsing the response as an AuroraException
