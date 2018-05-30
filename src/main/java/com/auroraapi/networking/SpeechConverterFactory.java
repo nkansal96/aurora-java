@@ -1,4 +1,4 @@
-package com.auroraapi;
+package com.auroraapi.networking;
 
 import com.auroraapi.models.Audio;
 import com.auroraapi.models.Speech;
@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 public class SpeechConverterFactory extends Converter.Factory {
     /**
      * Converts a ResponseBody if it is of Type Speech
+     *
      * @return Speech or null
      */
     @Override
@@ -27,6 +28,7 @@ public class SpeechConverterFactory extends Converter.Factory {
 
     /**
      * Converts a RequestBody if it is of Type Speech
+     *
      * @return Speech or null
      */
     @Override

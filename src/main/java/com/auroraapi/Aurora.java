@@ -3,6 +3,9 @@ package com.auroraapi;
 import com.auroraapi.callbacks.SpeechCallback;
 import com.auroraapi.callbacks.TranscriptCallback;
 import com.auroraapi.models.*;
+import com.auroraapi.networking.AuroraService;
+import com.auroraapi.networking.SpeechConverterFactory;
+import com.auroraapi.networking.TextTypeAdapter;
 import com.squareup.moshi.Moshi;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -138,16 +141,16 @@ public class Aurora {
     /**
      * Continuously listen for audio and return the Speech segments as they are recorded
      *
-     * @param callback      The callback that is invoked on every receipt of some Speech
-     * @param silenceLength The length of silence to wait for between Speech chunks
+     * @param callback The callback that is invoked on every receipt of some Speech
+     * @param params   The audio recording parameters
      */
-    public static void continuouslyListen(SpeechCallback callback, long silenceLength) {
+    public static void continuouslyListen(SpeechCallback callback, Audio.Params params) {
         checkInitialized();
         new Thread(() -> {
             boolean shouldContinue = true;
             while (shouldContinue) {
                 try {
-                    shouldContinue = callback.onSpeech(Speech.listenUntilSilence(silenceLength));
+                    shouldContinue = callback.onSpeech(Speech.listen(params));
                 } catch (IOException | LineUnavailableException e) {
                     shouldContinue = callback.onError(e);
                 }
@@ -162,21 +165,21 @@ public class Aurora {
      */
     public static void continuouslyListen(SpeechCallback callback) {
         checkInitialized();
-        continuouslyListen(callback, Speech.DEFAULT_SILENCE_LENGTH);
+        continuouslyListen(callback, Audio.Params.getDefaultParams());
     }
 
     /**
      * Directly get the Transcript for one Speech segment
      *
-     * @param silenceLength The length of silence to wait for before stopping recording
+     * @param params The audio recording parameters
      * @return A Transcript of the user's Speech
      * @throws LineUnavailableException if there is an error recording audio
      * @throws IOException              if there is an error parsing the response
      * @throws AuroraException          if there is an API-side error
      */
-    public static Transcript listenAndTranscribe(long silenceLength) throws IOException, LineUnavailableException, AuroraException {
+    public static Transcript listenAndTranscribe(Audio.Params params) throws IOException, LineUnavailableException, AuroraException {
         checkInitialized();
-        return getTranscript(Speech.listenUntilSilence(silenceLength));
+        return getTranscript(Speech.listen(params));
     }
 
     /**
@@ -189,16 +192,16 @@ public class Aurora {
      */
     public static Transcript listenAndTranscribe() throws AuroraException, IOException, LineUnavailableException {
         checkInitialized();
-        return listenAndTranscribe(Speech.DEFAULT_SILENCE_LENGTH);
+        return listenAndTranscribe(Audio.Params.getDefaultParams());
     }
 
     /**
      * Continuously listen and automatically get the Transcript for chunks of recorded speech
      *
-     * @param callback      The callback that is invoked on every receipt of Transcript for some Speech
-     * @param silenceLength The length of silence to wait for between submitting chunks for Transcript
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     * @param params   The audio recording parameters
      */
-    public static void continuouslyListenAndTranscribe(TranscriptCallback callback, long silenceLength) {
+    public static void continuouslyListenAndTranscribe(TranscriptCallback callback, Audio.Params params) {
         checkInitialized();
         continuouslyListen(new SpeechCallback() {
             @Override
@@ -214,7 +217,7 @@ public class Aurora {
             public boolean onError(Throwable throwable) {
                 return callback.onError(throwable);
             }
-        }, silenceLength);
+        }, params);
     }
 
     /**
@@ -224,7 +227,7 @@ public class Aurora {
      */
     public static void continuouslyListenAndTranscribe(TranscriptCallback callback) {
         checkInitialized();
-        continuouslyListenAndTranscribe(callback, Speech.DEFAULT_SILENCE_LENGTH);
+        continuouslyListenAndTranscribe(callback, Audio.Params.getDefaultParams());
     }
 
     /**

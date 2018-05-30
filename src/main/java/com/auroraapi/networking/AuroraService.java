@@ -1,4 +1,4 @@
-package com.auroraapi;
+package com.auroraapi.networking;
 
 import com.auroraapi.models.Interpret;
 import com.auroraapi.models.Speech;
