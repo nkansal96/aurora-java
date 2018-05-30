@@ -55,21 +55,21 @@ public class Audio {
 
     /**
      * Keeps recording until silence is encountered
-     * @param silenceLength the length of silence at which to stop stop recording in milliseconds
+     * @param silenceLength length of silence to stop recording at in milliseconds (has granularity of about ±250 ms)
      * @return A new Audio object containing the recorded audio
      */
-    public static Audio silenceRecord(long silenceLength) throws LineUnavailableException, IOException {
-        // TODO: This is completely untested and not sure if it works yet
+    public static Audio silenceRecord(final long silenceLength) throws LineUnavailableException, IOException {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
         ByteArrayOutputStream silenceAudio = new ByteArrayOutputStream();
         TargetDataLine line = AudioSystem.getTargetDataLine(format);
-        byte[] buffer = new byte[line.getBufferSize()];
+        byte[] buffer = new byte[Math.min(16 * format.getFrameSize(), line.getBufferSize())];
         line.open(format);
         line.start();
         boolean wasPreviouslySilent = false;
         long silenceStartTime = System.currentTimeMillis();
         long elapsedSilence = 0;
-        while (elapsedSilence < silenceLength) {
+        boolean startedRecording = false;
+        while (!startedRecording || elapsedSilence < silenceLength) {
             int numBytesRead = line.read(buffer, 0, buffer.length);
             if (isSilent(buffer, numBytesRead)) {
                 if (!wasPreviouslySilent) {
@@ -80,12 +80,14 @@ public class Audio {
                 silenceAudio.write(buffer, 0, numBytesRead);
             } else {
                 wasPreviouslySilent = false;
+                startedRecording = true;
                 elapsedSilence = 0;
                 if (silenceAudio.size() > 0) {
                     audioByteData.write(silenceAudio.toByteArray());
                     silenceAudio.reset();
                 }
                 audioByteData.write(buffer, 0, numBytesRead);
+
             }
         }
         line.stop();

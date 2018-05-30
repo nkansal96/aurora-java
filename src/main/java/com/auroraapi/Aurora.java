@@ -6,11 +6,10 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
-import retrofit2.Converter;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import retrofit2.*;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 
@@ -124,6 +123,27 @@ public class Aurora {
      */
     public static Interpret getInterpretation(Text text) throws AuroraException, IOException {
         return getInterpretation(text, null);
+    }
+
+    public static void continuouslyListen(TranscriptCallback callback, long silenceLength) {
+        checkInitialized();
+        new Thread(() -> {
+            boolean shouldContinue = true;
+            while (shouldContinue) {
+                try {
+                    Transcript transcript = getTranscript(Speech.listenUntilSilence(silenceLength));
+                    if (transcript != null && transcript.getTranscript() != null && transcript.getTranscript().length() > 0) {
+                        shouldContinue = callback.onTranscript(transcript);
+                    }
+                } catch (AuroraException | IOException | LineUnavailableException e) {
+                    shouldContinue = callback.onError(e);
+                }
+            }
+        }).start();
+    }
+
+    public static void continuouslyListen(TranscriptCallback callback) {
+        continuouslyListen(callback, Speech.DEFAULT_SILENCE_LENGTH);
     }
 
     /**
