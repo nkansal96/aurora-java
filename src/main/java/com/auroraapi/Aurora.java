@@ -125,6 +125,11 @@ public class Aurora {
         return getInterpretation(text, null);
     }
 
+    /**
+     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     * @param silenceLength The length of silence to wait for between submitting chunks for Transcript
+     */
     public static void continuouslyListen(TranscriptCallback callback, long silenceLength) {
         checkInitialized();
         new Thread(() -> {
@@ -142,6 +147,10 @@ public class Aurora {
         }).start();
     }
 
+    /**
+     * Continuously listen for audio and automatically request the Transcript for chunks of recorded audio
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
+     */
     public static void continuouslyListen(TranscriptCallback callback) {
         continuouslyListen(callback, Speech.DEFAULT_SILENCE_LENGTH);
     }
