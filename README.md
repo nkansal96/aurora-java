@@ -212,7 +212,7 @@ public class ListenUnspecifiedTime {
 
 #### Continuously listen
 
-Continuously listen and retrieve speech segments. Note: you can do anything with these speech segments, but here we'll convert them to text. Just like the previous example, these segments are demarcated by silence (1.0 second by default) and can be changed by passing the `silence_len` parameter. Additionally, you can make these segments fixed length (as in the example before the previous) by setting the `length` parameter.
+Continuously listen and retrieve speech segments. Note: you can do anything with these speech segments, but here we'll convert them to text. Just like the previous example, these segments are demarcated by silence (1.0 second by default) and can be changed by passing the `silenceLength` parameter. Additionally, you can make these segments fixed length (as in the example before the previous) by setting the `length` parameter.
 
 ```Java
 package main;
@@ -250,20 +250,7 @@ public class ContinuouslyListen {
 
 #### Listen and Transcribe
 
-If you already know that you wanted the recorded speech to be converted to text, you can do it in one step, reducing the amount of code you need to write and also reducing latency. Using the `listen_and_transcribe` method, the audio that is recorded automatically starts uploading as soon as you call the method and transcription begins. When the audio recording ends, you get back the final transcription.
-
-```Java
-from auroraapi.speech import listen_and_transcribe, continuously_listen_and_transcribe
-
-text = listen_and_transcribe(silence_len=0.5):
-print("You said: {}".format(text.text))
-
-# You can also use this in the same way as `continuously_listen`
-for text in continuously_listen_and_transcribe(silence_len=0.5):
-  print("You said: {}".format(text.text))
-```
-
-#### Listen and echo example
+If you already know that you wanted the recorded speech to be converted to text, you can do it in one step, reducing the amount of code you need to write and also reducing latency. Using the `continuouslyListenAndTranscribe` method, the audio that is recorded automatically starts uploading as soon as you call the method and transcription begins. When the audio recording ends, you get back the final transcription.
 
 ```Java
 package main;
@@ -284,6 +271,56 @@ public class ListenAndTranscribe {
             public boolean onTranscript(Transcript transcript) {
                 System.out.println("Transcription: " + transcript.getTranscript());
                 return true;
+            }
+
+            @Override
+            public boolean onError(Throwable throwable) {
+                throwable.printStackTrace();
+                return false;
+            }
+        };
+
+        // NOTE: Params are optional and the silence and listen lengths are customizable.
+        Aurora.continuouslyListenAndTranscribe(callback);
+    }
+}
+```
+
+#### Listen and echo example
+
+```Java
+package main;
+
+import com.auroraapi.Aurora;
+import com.auroraapi.callbacks.TranscriptCallback;
+import com.auroraapi.models.*;
+
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
+
+public class ListenAndTranscribe {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        TranscriptCallback callback = new TranscriptCallback() {
+            @Override
+            public boolean onTranscript(Transcript transcript) {
+                Text text = new Text(transcript.getTranscript());
+
+                try {
+                    Speech speech = Aurora.getSpeech(text);
+                    Audio audio = speech.getAudio();
+                    audio.play();
+
+                    return true;
+                } catch (AuroraException e) {
+                    e.printStackTrace();
+                } catch (LineUnavailableException | InterruptedException | IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
