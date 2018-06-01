@@ -37,22 +37,40 @@ First, make sure you have an account with [Aurora](http://dashboard.auroraapi.co
 ### Text to Speech (TTS)
 
 ```Java
-# Import the package
-import auroraapi as aurora
-from auroraapi.text import Text
+package main;
 
-# Set your application settings
-aurora.config.app_id    = "YOUR_APP_ID"     # put your app ID here
-aurora.config.app_token = "YOUR_APP_TOKEN"  # put your app token here
+import com.auroraapi.Aurora;
+import com.auroraapi.models.Audio;
+import com.auroraapi.models.AuroraException;
+import com.auroraapi.models.Speech;
+import com.auroraapi.models.Text;
 
-# query the TTS service
-speech = Text("Hello world").speech()
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
 
-# play the resulting audio
-speech.audio.play()
+public class TextToSpeech {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
 
-# or save it to a file
-speech.audio.write_to_file("test.wav")
+        Aurora.init(appId, appToken);
+
+        Text text = new Text("Hello World!");
+        System.out.println("Example tts usage for: " + text.toString());
+
+        try {
+            Speech speech = Aurora.getSpeech(text);
+            Audio audio = speech.getAudio();
+
+            audio.play();
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException | InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
 ```
 
 ### Speech to Text (STT)
@@ -60,62 +78,136 @@ speech.audio.write_to_file("test.wav")
 #### Convert a WAV file to Speech
 
 ```Java
-# Import the package
-import auroraapi as aurora
-from auroraapi.audio import AudioFile
-from auroraapi.speech import Speech
+package main;
 
-# Set your application settings
-aurora.config.app_id    = "YOUR_APP_ID"      # put your app ID here
-aurora.config.app_token = "YOUR_APP_TOKEN"   # put your app token here
+import com.auroraapi.Aurora;
+import com.auroraapi.models.*;
 
-# open an existing WAV file (16-bit, mono, 16KHz WAV PCM)
-with open("test.wav", "rb") as f:
-  a = AudioFile(f.read())
-  p = Speech(a).text()
-  print(p.text) # 'hello world'
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
+
+public class SpeechToText {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        try {
+            Audio audio = Audio.fromFile("text.wav");
+            Speech speech = new Speech(audio);
+            Transcript transcript = Aurora.getTranscript(speech);
+
+            System.out.println("Transcript: " + transcript.toString());
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 #### Convert a previous Text API call to Speech
 ```Java
-from auroraapi.text import Text
-from auroraapi.speech import Speech
+package main;
 
-# Call the TTS API to convert "Hello world" to speech
-speech = Text("Hello world").speech()
+import com.auroraapi.Aurora;
+import com.auroraapi.models.AuroraException;
+import com.auroraapi.models.Speech;
+import com.auroraapi.models.Text;
+import com.auroraapi.models.Transcript;
 
-# Previous API returned a Speech object, so we can just call
-# the text() method to get a prediction
-p = speech.text()
-print(p.text) # 'hello world'
+import java.io.IOException;
+public class TextAPICallToSpeech {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        Text text = new Text("Hello World!");
+        System.out.println("Example tts usage for: " + text.toString());
+
+        try {
+            Speech speech = Aurora.getSpeech(text);
+            Transcript transcript = Aurora.getTranscript(speech);
+
+            System.out.println("Transcription: " + transcript.toString());
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 #### Listen for a specified amount of time
 ```Java
-from auroraapi.speech import listen
+package main;
 
-# Listen for 3 seconds (silence is automatically trimmed)
-speech = listen(length=3)
+import com.auroraapi.Aurora;
+import com.auroraapi.models.*;
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
 
-# Convert to text
-p = speech.text()
-print(p.text) # prints the prediction
+public class ListenSpecifiedTime {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        Audio.Params params = new Audio.Params(3L, Audio.Params.DEFAULT_SILENCE_LENGTH);
+
+        try {
+            Speech speech = Speech.listen(params);
+            Transcript transcript = Aurora.getTranscript(speech);
+
+            System.out.println("Transcription: " + transcript.getTranscript());
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 #### Listen for an unspecified amount of time
 
 Calling this API will start listening and will automatically stop listening after a certain amount of silence (default is 1.0 seconds).
 ```Java
-from auroraapi.speech import listen
+package main;
 
-# Start listening until 1.0s of silence
-speech = listen()
-# Or specify your own silence timeout (0.5 seconds shown here)
-speech = listen(silence_len=0.5)
+import com.auroraapi.Aurora;
+import com.auroraapi.models.*;
+import javax.sound.sampled.LineUnavailableException;
+import java.io.IOException;
 
-# Convert to text
-p = speech.text()
-print(p.text) # prints the prediction
+public class ListenUnspecifiedTime {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        Audio.Params params = new Audio.Params(Audio.Params.DEFAULT_LISTEN_LENGTH, 1L);
+
+        try {
+            Speech speech = Speech.listen(params);
+            Transcript transcript = Aurora.getTranscript(speech);
+
+            System.out.println("Transcription: " + transcript.getTranscript());
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
 ```
 
 #### Continuously listen
@@ -123,22 +215,37 @@ print(p.text) # prints the prediction
 Continuously listen and retrieve speech segments. Note: you can do anything with these speech segments, but here we'll convert them to text. Just like the previous example, these segments are demarcated by silence (1.0 second by default) and can be changed by passing the `silence_len` parameter. Additionally, you can make these segments fixed length (as in the example before the previous) by setting the `length` parameter.
 
 ```Java
-from auroraapi.speech import continuously_listen
+package main;
 
-# Continuously listen and convert to speech (blocking example)
-for speech in continuously_listen():
-  p = speech.text()
-  print(p.text)
+import com.auroraapi.Aurora;
+import com.auroraapi.callbacks.SpeechCallback;
+import com.auroraapi.models.*;
 
-# Reduce the amount of silence in between speech segments
-for speech in continuously_listen(silence_len=0.5):
-  p = speech.text()
-  print(p.text)
+public class ContinuouslyListen {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
 
-# Fixed-length speech segments of 3 seconds
-for speech in continuously_listen(length=3.0):
-  p = speech.text()
-  print(p.text)
+        Aurora.init(appId, appToken);
+
+        SpeechCallback callback = new SpeechCallback() {
+            @Override
+            public boolean onSpeech(Speech speech) {
+                System.out.println("Speech: " + speech.toString());
+                return false;
+            }
+
+            @Override
+            public boolean onError(Throwable throwable) {
+                throwable.printStackTrace();
+                return false;
+            }
+        };
+
+        // Params are optional
+        Aurora.continuouslyListen(callback);
+    }
+}
 ```
 
 #### Listen and Transcribe
@@ -159,10 +266,37 @@ for text in continuously_listen_and_transcribe(silence_len=0.5):
 #### Listen and echo example
 
 ```Java
-from auroraapi.speech import continuously_listen_and_transcribe
+package main;
 
-for text in continuously_listen_and_transcribe():
-  text.speech().audio.play()
+import com.auroraapi.Aurora;
+import com.auroraapi.callbacks.TranscriptCallback;
+import com.auroraapi.models.*;
+
+public class ListenAndTranscribe {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        TranscriptCallback callback = new TranscriptCallback() {
+            @Override
+            public boolean onTranscript(Transcript transcript) {
+                System.out.println("Transcription: " + transcript.getTranscript());
+                return true;
+            }
+
+            @Override
+            public boolean onError(Throwable throwable) {
+                throwable.printStackTrace();
+                return false;
+            }
+        };
+
+        // NOTE: Params are optional and the silence and listen lengths are customizable.
+        Aurora.continuouslyListenAndTranscribe(callback);
+    }
+}
 ```
 
 ### Interpret (Language Understanding)
@@ -172,35 +306,91 @@ The interpret service allows you to take any Aurora `Text` object and understand
 #### Basic example
 
 ```Java
-from auroraapi.text import Text
+package main;
 
-# create a Text object
-text = Text("what is the time in los angeles")
+import com.auroraapi.Aurora;
+import com.auroraapi.models.*;
+import java.io.IOException;
+import java.util.Map;
 
-# call the interpret service. This returns an `Interpret` object.
-i = text.interpret()
+public class TextToInterpret {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
 
-# get the user's intent
-print(i.intent)   # time
+        Aurora.init(appId, appToken);
 
-# get any additional information
-print(i.entities) # { "location": "los angeles" }
+        try {
+            String str = "what is the weather in los angeles";
+            Text text = new Text(str);
+
+            Interpret interpret = Aurora.getInterpretation(text);
+
+            String interpretation = "Interpretation:\n";
+            interpretation += String.format("Intent: %s\n", interpret.getIntent());
+
+            Map<String, String> entities = interpret.getEntities();
+            for (String key : entities.keySet()) {
+                String value = entities.get(key);
+                interpretation += String.format("Entity key: %s, value: %s", key, value);
+            }
+
+            System.out.println(interpretation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (AuroraException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
 ```
 
 #### User query example
 
 ```Java
-from auroraapi.text import Text
+package main;
 
-while True:
-  # Repeatedly ask the user to enter a command
-  user_text = raw_input("Enter a command:")
-  if user_text == "quit":
-    break
-  
-  # Interpret and print the results
-  i = Text(user_text).interpret()
-  print(i.intent, i.entities)
+import com.auroraapi.Aurora;
+import com.auroraapi.models.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Scanner;
+
+public class UserQuery {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        while (true) {
+            try {
+                Scanner scanner = new Scanner(System.in);
+
+                // Assume string input
+                Text text = new Text(scanner.nextLine());
+
+                Interpret interpret = Aurora.getInterpretation(text);
+
+                String interpretation = "Interpretation:\n";
+                interpretation += String.format("Intent: %s\n", interpret.getIntent());
+
+                Map<String, String> entities = interpret.getEntities();
+                for (String key : entities.keySet()) {
+                    String value = entities.get(key);
+                    interpretation += String.format("Entity key: %s, value: %s", key, value);
+                }
+
+                System.out.println(interpretation);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (AuroraException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
 ```
 
 #### Smart Lamp
@@ -208,17 +398,60 @@ while True:
 This example shows how easy it is to voice-enable a smart lamp. It responds to queries in the form of "turn on the lights" or "turn off the lamp". You define what `object` you're listening for (so that you can ignore queries like "turn on the music").
 
 ```Java
-from auroraapi.speech import continuously_listen
+package main;
 
-valid_words = ["light", "lights", "lamp"]
-valid_entities = lambda d: "object" in d and d["object"] in valid_words
+import com.auroraapi.Aurora;
+import com.auroraapi.callbacks.TranscriptCallback;
+import com.auroraapi.models.*;
 
-for speech in continuously_listen(silence_len=0.5):
-  i = speech.text().interpret()
-  if i.intent == "turn_on" and valid_entities(i.entities):
-    # do something to actually turn on the lamp
-    print("Turning on the lamp")
-  elif i.intent == "turn_off" and valid_entities(i.entities):
-    # do something to actually turn off the lamp
-    print("Turning off the lamp")
+import java.io.IOException;
+
+public class LampExample {
+    public static void main(String[] args) {
+        String appId = "<put your appId here>";
+        String appToken = "<put your appToken here>";
+
+        Aurora.init(appId, appToken);
+
+        TranscriptCallback callback = new TranscriptCallback() {
+            @Override
+            public boolean onTranscript(Transcript transcript) {
+                Text text = new Text(transcript.getTranscript());
+                String[] validWords = {"light", "lights", "lamp"};
+
+                try {
+                    Interpret interpret = Aurora.getInterpretation(text);
+                    String intent = interpret.getIntent();
+                    String object = interpret.getEntities().get("object");
+
+                    for (String word : validWords) {
+                        if (object.equals(word)) {
+                            if (intent.equals("turn_on")) {
+                                // turn on the lamp
+                            } else if (intent.equals("turn_off")) {
+                                // turn off the lamp
+                            }
+
+                            break;
+                        }
+                    }
+
+                    return true;
+                } catch (AuroraException | IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean onError(Throwable throwable) {
+                throwable.printStackTrace();
+                return false;
+            }
+        };
+
+        Audio.Params params = Audio.Params.getDefaultParams();
+        Aurora.continuouslyListenAndTranscribe(callback, params);
+    }
+}
 ```

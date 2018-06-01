@@ -6,6 +6,7 @@ import com.auroraapi.models.AuroraException;
 import com.auroraapi.models.Speech;
 import com.auroraapi.models.Text;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 
 public class TextToSpeech {
@@ -22,11 +23,10 @@ public class TextToSpeech {
             Speech speech = Aurora.getSpeech(text);
             Audio audio = speech.getAudio();
 
-            // TODO: Uncomment when audio has play implemented
-            // audio.play();
+            audio.play();
         } catch (AuroraException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (LineUnavailableException | InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
