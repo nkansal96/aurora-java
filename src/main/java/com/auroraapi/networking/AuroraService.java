@@ -1,4 +1,4 @@
-package com.auroraapi;
+package com.auroraapi.networking;
 
 import com.auroraapi.models.Interpret;
 import com.auroraapi.models.Speech;
@@ -12,9 +12,8 @@ public interface AuroraService {
     @GET("tts")
     Call<Speech> getSpeech(@Query("text") Text text);
 
-    @Multipart
     @POST("stt")
-    Call<Transcript> getText(@Part("speech") Speech speech);
+    Call<Transcript> getTranscript(@Body Speech speech);
 
     @GET("interpret")
     Call<Interpret> getInterpret(@Query("text") Text text, @Query("model") String model);

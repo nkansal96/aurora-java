@@ -1,4 +1,4 @@
-package com.auroraapi;
+package com.auroraapi.networking;
 
 import com.auroraapi.models.Text;
 import com.squareup.moshi.FromJson;
