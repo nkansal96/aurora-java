@@ -318,8 +318,10 @@ public class ListenAndTranscribe {
                     return true;
                 } catch (AuroraException e) {
                     e.printStackTrace();
+                    return false;
                 } catch (LineUnavailableException | InterruptedException | IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
             }
 
