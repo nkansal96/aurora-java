@@ -16,7 +16,20 @@ public class Text {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Text text1 = (Text) o;
+        return text != null ? text.equals(text1.text) : text1.text == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return text != null ? text.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
-        return text;
+        return "Text{text='" + text + "'}";
     }
 }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static com.auroraapi.util.AudioUtils.isSilent;
 
@@ -181,6 +182,19 @@ public class Audio {
         AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, wavFile);
 
         audioInputStream.close();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Audio audio = (Audio) o;
+        return Arrays.equals(data, audio.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(data);
     }
 
     /**
