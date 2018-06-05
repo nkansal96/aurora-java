@@ -207,7 +207,11 @@ public class Aurora {
             @Override
             public boolean onSpeech(Speech speech) {
                 try {
-                    return callback.onTranscript(getTranscript(speech));
+                    Transcript transcript = getTranscript(speech);
+                    if (transcript != null && transcript.getTranscript() != null && transcript.getTranscript().length() > 0) {
+                        return callback.onTranscript(transcript);
+                    }
+                    return true; // If the Transcript was empty, continue listening
                 } catch (AuroraException | IOException e) {
                     return callback.onError(e);
                 }
