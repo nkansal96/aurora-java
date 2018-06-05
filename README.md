@@ -17,9 +17,10 @@ Add this dependency to your project's POM:
 
 ```xml
 <dependency>
-  <groupId>com.aurora</groupId>
-  <artifactId>sdk</artifactId>
+  <groupId>com.auroraapi</groupId>
+  <artifactId>aurora-java</artifactId>
   <version>1.0.0</version>
+  <type>pom</type>
 </dependency>
 ```
 
@@ -27,7 +28,7 @@ Add this dependency to your project's POM:
 Add this dependency to your project's build file:
 
 ```groovy
-implementation "com.aurora:sdk:1.0.0"
+implementation 'com.auroraapi:aurora-java:1.0.0'
 ```
 
 ## Basic Usage

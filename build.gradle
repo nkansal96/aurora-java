@@ -28,8 +28,8 @@ dependencies {
     api 'com.squareup.retrofit2:converter-moshi:2.4.0'
 }
 bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
+    user = 'vanshg'
+    key = 'df17975daaad156e79b166dce80693e8b8719b51'
     publications = ['MyPublication']
     pkg {
         repo = 'maven'

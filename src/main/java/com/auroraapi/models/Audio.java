@@ -71,6 +71,8 @@ public class Audio {
      *
      * @param silenceLength length of silence to stop recording at in milliseconds (has granularity of about ±250 ms)
      * @return A new Audio object containing the recorded audio
+     * @throws LineUnavailableException If there is a mic error
+     * @throws IOException If there is an error saving the recording
      */
     public static Audio silenceRecord(final long silenceLength) throws LineUnavailableException, IOException {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
