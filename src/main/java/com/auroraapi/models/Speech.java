@@ -3,6 +3,7 @@ package com.auroraapi.models;
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 
+@SuppressWarnings("WeakerAccess")
 public class Speech {
 
     private Audio audio;
@@ -25,7 +26,7 @@ public class Speech {
      * @param params The Audio recording parameters
      * @return A speech object containing the recorded audio
      * @throws LineUnavailableException If microphone was unavailable
-     * @throws IOException If there was an error saving the recording
+     * @throws IOException              If there was an error saving the recording
      */
     public static Speech listen(Audio.Params params) throws IOException, LineUnavailableException {
         return new Speech(Audio.record(params));

@@ -1,5 +1,6 @@
 package com.auroraapi.models;
 
+@SuppressWarnings("WeakerAccess")
 public class Transcript {
     private String transcript;
 

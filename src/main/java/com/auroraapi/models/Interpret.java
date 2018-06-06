@@ -2,6 +2,7 @@ package com.auroraapi.models;
 
 import java.util.Map;
 
+@SuppressWarnings("WeakerAccess")
 public class Interpret {
     private Text text;
     private String intent;

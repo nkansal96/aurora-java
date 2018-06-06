@@ -1,5 +1,6 @@
 package com.auroraapi.models;
 
+@SuppressWarnings("WeakerAccess")
 public class Text {
     private String text;
 

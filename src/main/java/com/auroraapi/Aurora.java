@@ -18,6 +18,7 @@ import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 
+@SuppressWarnings("WeakerAccess")
 public class Aurora {
 
     private static final String BASE_URL_V1 = "https://api.auroraapi.com/v1/";

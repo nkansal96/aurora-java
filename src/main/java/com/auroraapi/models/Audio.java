@@ -17,6 +17,7 @@ import static com.auroraapi.util.AudioUtils.trimSilence;
 /**
  * Currently only supports WAVE filetype, but can be extended to support other filetypes
  */
+@SuppressWarnings("WeakerAccess")
 public class Audio {
 
     private static final int NUM_CHANNELS = 1;
@@ -217,6 +218,7 @@ public class Audio {
     /**
      * This class is used to specify audio recording parameters
      */
+    @SuppressWarnings("WeakerAccess")
     public static class Params {
         /**
          * The default silence length in milliseconds

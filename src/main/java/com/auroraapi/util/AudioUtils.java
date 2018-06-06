@@ -23,8 +23,9 @@ public class AudioUtils {
 
     /**
      * Trims silence audio so that only the most recent silence bytes are recorded
+     *
      * @param silentAudioData The raw silent only audio
-     * @param bufferSize The size of the recording buffer
+     * @param bufferSize      The size of the recording buffer
      * @return A trimmed representation of the silence audio
      */
     public static byte[] trimSilence(byte[] silentAudioData, int bufferSize) {
