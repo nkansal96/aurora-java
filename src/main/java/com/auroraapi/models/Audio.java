@@ -48,21 +48,33 @@ public class Audio {
 
     /**
      * Records audio and returns a new Audio object containing the recorded audio
+     * The beginning silence in the audio will be trimmed
      *
      * @param millis The millis of time, in milliseconds, to record
      * @return A new Audio object containing the recorded audio
-     * @throws LineUnavailableException If the mic is unavailble
+     * @throws LineUnavailableException If the mic is unavailable
+     * @throws IOException              If there was an error saving the recording
      */
-    public static Audio timedRecord(long millis) throws LineUnavailableException {
+    public static Audio timedRecord(long millis) throws LineUnavailableException, IOException {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
         TargetDataLine line = AudioSystem.getTargetDataLine(format);
-        byte[] buffer = new byte[line.getBufferSize()];
+        byte[] buffer = new byte[BUF_SIZE];
+        int numBytesRead;
         line.open(format);
         line.start();
 
+        // Don't begin recording until no silence
+        do {
+            numBytesRead = line.read(buffer, 0, buffer.length);
+            audioByteData.write(buffer, 0, numBytesRead); // Using audioByteData as a temp buffer
+        } while (isSilent(buffer, numBytesRead));
+        byte[] trimmedSilence = trimSilence(audioByteData.toByteArray(), BUF_SIZE);
+        audioByteData.reset();
+        audioByteData.write(trimmedSilence);
+
         long stopTime = System.currentTimeMillis() + millis;
         while (System.currentTimeMillis() < stopTime) {
-            int numBytesRead = line.read(buffer, 0, buffer.length);
+            numBytesRead = line.read(buffer, 0, buffer.length);
             audioByteData.write(buffer, 0, numBytesRead);
         }
         line.stop();
@@ -76,7 +88,7 @@ public class Audio {
      * @param silenceLength length of silence to stop recording at in milliseconds (has granularity of about ±250 ms)
      * @return A new Audio object containing the recorded audio
      * @throws LineUnavailableException If there is a mic error
-     * @throws IOException If there is an error saving the recording
+     * @throws IOException              If there is an error saving the recording
      */
     public static Audio silenceRecord(final long silenceLength) throws LineUnavailableException, IOException {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();

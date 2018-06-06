@@ -30,7 +30,6 @@ public class AudioUtils {
     public static byte[] trimSilence(byte[] silentAudioData, int bufferSize) {
         int maxLen = MAX_SILENCE_LENGTH * bufferSize;
         if (silentAudioData.length > maxLen) {
-            System.out.println("silentAudioData.length > maxLen");
             return Arrays.copyOfRange(silentAudioData, silentAudioData.length - maxLen, silentAudioData.length);
         }
         return silentAudioData;

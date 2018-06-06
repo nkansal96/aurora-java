@@ -19,7 +19,7 @@ Add this dependency to your project's POM:
 <dependency>
   <groupId>com.auroraapi</groupId>
   <artifactId>aurora-java</artifactId>
-  <version>1.0.0</version>
+  <version>0.1.2</version>
   <type>pom</type>
 </dependency>
 ```
@@ -28,7 +28,7 @@ Add this dependency to your project's POM:
 Add this dependency to your project's build file:
 
 ```groovy
-implementation 'com.auroraapi:aurora-java:1.0.0'
+implementation 'com.auroraapi:aurora-java:0.1.2'
 ```
 
 ## Basic Usage
