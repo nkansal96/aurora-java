@@ -1,5 +1,7 @@
 package com.auroraapi.models;
 
+import com.auroraapi.util.AudioUtils;
+
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static com.auroraapi.util.AudioUtils.isSilent;
+import static com.auroraapi.util.AudioUtils.trimSilence;
 
 /**
  * Currently only supports WAVE filetype, but can be extended to support other filetypes
@@ -22,6 +25,7 @@ public class Audio {
     private static final boolean SIGNED = true;
     private static final boolean BIG_ENDIAN = false;
     private static final AudioFormat format = new AudioFormat(RATE, SAMPLE_SIZE, NUM_CHANNELS, SIGNED, BIG_ENDIAN);
+    private static final int BUF_SIZE = 1024;
 
     private byte[] data;
 
@@ -78,7 +82,7 @@ public class Audio {
         ByteArrayOutputStream audioByteData = new ByteArrayOutputStream();
         ByteArrayOutputStream silenceAudio = new ByteArrayOutputStream();
         TargetDataLine line = AudioSystem.getTargetDataLine(format);
-        byte[] buffer = new byte[Math.min(16 * format.getFrameSize(), line.getBufferSize())];
+        byte[] buffer = new byte[BUF_SIZE];
         line.open(format);
         line.start();
         boolean wasPreviouslySilent = false;
@@ -99,7 +103,7 @@ public class Audio {
                 startedRecording = true;
                 elapsedSilence = 0;
                 if (silenceAudio.size() > 0) {
-                    audioByteData.write(silenceAudio.toByteArray());
+                    audioByteData.write(trimSilence(silenceAudio.toByteArray(), BUF_SIZE));
                     silenceAudio.reset();
                 }
                 audioByteData.write(buffer, 0, numBytesRead);
@@ -128,7 +132,6 @@ public class Audio {
 
     public void setData(byte[] data) {
         this.data = data;
-        // this.data = Arrays.copyOf(data, data.length);
     }
 
     public String getContentType() {

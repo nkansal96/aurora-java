@@ -141,10 +141,10 @@ public class Aurora {
     /**
      * Continuously listen for audio and return the Speech segments as they are recorded
      *
-     * @param callback The callback that is invoked on every receipt of some Speech
      * @param params   The audio recording parameters
+     * @param callback The callback that is invoked on every receipt of some Speech
      */
-    public static void continuouslyListen(SpeechCallback callback, Audio.Params params) {
+    public static void continuouslyListen(Audio.Params params, SpeechCallback callback) {
         checkInitialized();
         new Thread(() -> {
             boolean shouldContinue = true;
@@ -165,7 +165,7 @@ public class Aurora {
      */
     public static void continuouslyListen(SpeechCallback callback) {
         checkInitialized();
-        continuouslyListen(callback, Audio.Params.getDefaultParams());
+        continuouslyListen(Audio.Params.getDefaultParams(), callback);
     }
 
     /**
@@ -198,12 +198,12 @@ public class Aurora {
     /**
      * Continuously listen and automatically get the Transcript for chunks of recorded speech
      *
-     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
      * @param params   The audio recording parameters
+     * @param callback The callback that is invoked on every receipt of Transcript for some Speech
      */
-    public static void continuouslyListenAndTranscribe(TranscriptCallback callback, Audio.Params params) {
+    public static void continuouslyListenAndTranscribe(Audio.Params params, TranscriptCallback callback) {
         checkInitialized();
-        continuouslyListen(new SpeechCallback() {
+        continuouslyListen(params, new SpeechCallback() {
             @Override
             public boolean onSpeech(Speech speech) {
                 try {
@@ -221,7 +221,7 @@ public class Aurora {
             public boolean onError(Throwable throwable) {
                 return callback.onError(throwable);
             }
-        }, params);
+        });
     }
 
     /**
@@ -231,7 +231,7 @@ public class Aurora {
      */
     public static void continuouslyListenAndTranscribe(TranscriptCallback callback) {
         checkInitialized();
-        continuouslyListenAndTranscribe(callback, Audio.Params.getDefaultParams());
+        continuouslyListenAndTranscribe(Audio.Params.getDefaultParams(), callback);
     }
 
     /**
