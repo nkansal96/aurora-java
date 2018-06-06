@@ -1,5 +1,5 @@
 group 'com.auroraapi'
-version '1.0.0'
+version '0.1.2'
 
 buildscript {
     repositories {
@@ -38,7 +38,7 @@ bintray {
         licenses = ['MIT']
         vcsUrl = 'https://github.com/nkansal96/aurora-java.git'
         version {
-            name = '1.0.0'
+            name = '0.1.2'
             desc = 'Java Wrapper for Aurora API'
             released  = new Date()
         }
@@ -53,7 +53,7 @@ publishing {
             artifact javadocJar
             groupId group
             artifactId 'aurora-java'
-            version '1.0.0'
+            version '0.1.2'
         }
     }
 }
