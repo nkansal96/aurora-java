@@ -31,6 +31,9 @@ Add this dependency to your project's build file:
 implementation 'com.auroraapi:aurora-java:0.1.2'
 ```
 
+### JAR Download
+Download the JAR file directly from [here](https://bintray.com/auroraapi/maven/download_file?file_path=com%2Fauroraapi%2Faurora-java%2F0.1.2%2Faurora-java-0.1.2.jar)
+
 ## Basic Usage
 
 First, make sure you have an account with [Aurora](http://dashboard.auroraapi.com) and have created an Application.
