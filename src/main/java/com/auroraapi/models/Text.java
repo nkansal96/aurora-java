@@ -31,6 +31,6 @@ public class Text {
 
     @Override
     public String toString() {
-        return "Text{text='" + text + "'}";
+        return text;
     }
 }
